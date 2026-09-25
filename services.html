@@ -1,0 +1,96 @@
+<!-- <?php 
+?> -->
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Services &amp; Pricing — FreshTrack</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Fraunces:wght@500;600;700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body data-nav-current="services">
+
+  <header class="tag-nav">
+    <div class="container-tag">
+      <a class="brand" href="index.html"><span class="punch"></span>FreshTrack</a>
+      <nav>
+        <a href="index.html" data-nav="home">Home</a>
+        <a href="services.html" data-nav="services">Services</a>
+        <a href="index.html#how-it-works">How it works</a>
+      </nav>
+      <div class="actions" id="navActions"></div>
+    </div>
+  </header>
+
+  <section class="hero" style="padding-bottom:2rem;">
+    <div class="container-tag" style="grid-template-columns:1fr;">
+      <div>
+        <div class="eyebrow-line">SERVICES &amp; PRICING</div>
+        <h1>Every service, one price list</h1>
+        <p class="lede">Prices shown are per-unit estimates. The exact total is confirmed once your items are received
+          and weighed or counted.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container-tag">
+      <div class="tag-grid" id="serviceGrid"></div>
+    </div>
+  </section>
+
+  <section class="section alt">
+    <div class="container-tag">
+      <div class="section-head">
+        <span class="kicker">GOOD TO KNOW</span>
+        <h2>What's included in this version</h2>
+      </div>
+      <div class="tag-grid">
+        <div class="tag-card">
+          <h3>In scope now</h3>
+          <p class="text-muted">Booking, status tracking, order history, and notifications when your order is ready.</p>
+        </div>
+        <div class="tag-card">
+          <h3>Coming later</h3>
+          <p class="text-muted">Card payments, pickup &amp; delivery scheduling, and a dedicated mobile app are planned
+            for a future release.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer class="tag-footer">
+    <div class="container-tag">
+      <span>© 2026 FreshTrack — a laundry booking &amp; tracking demo.</span>
+      <a href="register.html">Create an account to book →</a>
+    </div>
+  </footer>
+
+  <script src="js/data.js"></script>
+  <script src="js/app.js"></script>
+  <script>
+    const grid = document.getElementById("serviceGrid");
+    DB.getServices().forEach(s => {
+      grid.insertAdjacentHTML("beforeend", `
+      <div class="tag-card">
+        <span class="price">${fmtMoney(s.price)} <span class="text-muted" style="font-family:var(--font-body); font-weight:400; font-size:.8rem;">${s.unit}</span></span>
+        <h3>${s.name}</h3>
+        <p>${s.description}</p>
+        <span class="meta">Est. turnaround: ${s.eta}</span>
+        <div style="margin-top:.9rem;">
+          <a class="btn-tag small marigold" href="register.html">Book this service</a>
+        </div>
+      </div>
+    `);
+    });
+  </script>
+</body>
+
+</html>

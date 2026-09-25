@@ -1,0 +1,182 @@
+<!-- <?php 
+?> -->
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Staff Dashboard — FreshTrack</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Fraunces:wght@500;600;700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body data-nav-current="">
+
+  <header class="tag-nav">
+    <div class="container-tag">
+      <a class="brand" href="index.html"><span class="punch"></span>FreshTrack</a>
+      <nav>
+        <a href="index.html" data-nav="home">Home</a>
+      </nav>
+      <div class="actions" id="navActions"></div>
+    </div>
+  </header>
+
+  <div class="dash-shell">
+    <aside class="dash-side">
+      <div class="who" id="whoLine">Staff</div>
+      <a href="#" class="active">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        Order queue
+      </a>
+    </aside>
+
+    <main class="dash-main">
+      <div class="dash-header">
+        <div>
+          <h2 class="mt-0">Order queue</h2>
+          <p class="text-muted" style="margin:0;">Move each order forward as it goes through the wash.</p>
+        </div>
+      </div>
+
+      <div class="stat-row" id="statRow"></div>
+
+      <div class="section-head" style="margin-bottom:1rem;">
+        <span class="kicker">FILTER</span>
+      </div>
+      <div class="flow-strip" style="margin-bottom:1.4rem;" id="filterRow"></div>
+
+      <div class="table-wrap">
+        <table class="table-tag">
+          <thead>
+            <tr>
+              <th>Order ID</th>
+              <th>Customer</th>
+              <th>Service</th>
+              <th>Qty</th>
+              <th>Booked</th>
+              <th>Status</th>
+              <th>Update</th>
+            </tr>
+          </thead>
+          <tbody id="ordersBody"></tbody>
+        </table>
+      </div>
+    </main>
+  </div>
+
+  <footer class="tag-footer">
+    <div class="container-tag">
+      <span>© 2026 FreshTrack</span>
+    </div>
+  </footer>
+
+  <script src="js/data.js"></script>
+  <script src="js/app.js"></script>
+  <script>
+    const session = Auth.requireRole("staff");
+  </script>
+  <script>
+    if (session) {
+      document.getElementById("whoLine").textContent = session.name;
+
+      const ALL = "All";
+      let activeFilter = ALL;
+      const filters = [ALL, ...DB.STATUS_FLOW, "Cancelled"];
+
+      function renderFilters() {
+        document.getElementById("filterRow").innerHTML = filters.map(f =>
+          `<span class="flow-chip ${f === activeFilter ? "on" : ""}" data-filter="${f}" style="cursor:pointer;">${f}</span>`
+        ).join("");
+        document.querySelectorAll("[data-filter]").forEach(chip => {
+          chip.addEventListener("click", () => { activeFilter = chip.dataset.filter; renderFilters(); renderTable(); });
+        });
+      }
+
+      function renderStats() {
+        const orders = DB.getOrders();
+        const active = orders.filter(o => !["Completed", "Cancelled"].includes(o.status));
+        const readyToday = orders.filter(o => o.status === "Ready for Pickup");
+        document.getElementById("statRow").innerHTML = `
+      <div class="stat-card"><div class="n">${orders.length}</div><div class="l">Total orders</div></div>
+      <div class="stat-card"><div class="n">${active.length}</div><div class="l">In progress</div></div>
+      <div class="stat-card"><div class="n">${readyToday.length}</div><div class="l">Ready for pickup</div></div>
+    `;
+      }
+
+      function nextStatus(status) {
+        const idx = DB.STATUS_FLOW.indexOf(status);
+        if (idx === -1 || idx === DB.STATUS_FLOW.length - 1) return null;
+        return DB.STATUS_FLOW[idx + 1];
+      }
+
+      function renderTable() {
+        const users = DB.getUsers();
+        let orders = DB.getOrders().sort((a, b) => b.createdAt - a.createdAt);
+        if (activeFilter !== ALL) orders = orders.filter(o => o.status === activeFilter);
+
+        const tbody = document.getElementById("ordersBody");
+        if (!orders.length) {
+          tbody.innerHTML = `<tr><td colspan="7" class="text-muted">No orders match this filter.</td></tr>`;
+          return;
+        }
+        tbody.innerHTML = orders.map(o => {
+          const svc = DB.findService(o.serviceId);
+          const cust = users.find(u => u.id === o.customerId);
+          const next = nextStatus(o.status);
+          const canCancel = !["Completed", "Cancelled"].includes(o.status);
+          return `
+        <tr>
+          <td>${o.id}</td>
+          <td>${cust ? cust.name : "—"}</td>
+          <td>${svc ? svc.name : o.serviceId}</td>
+          <td>${o.qty}</td>
+          <td>${fmtDate(o.createdAt)}</td>
+          <td><span class="status-pill ${statusClass(o.status)}">${o.status}</span></td>
+          <td>
+            <div style="display:flex; gap:.4rem; flex-wrap:wrap;">
+              ${next ? `<button class="btn-tag small" data-advance="${o.id}" type="button">Mark ${next}</button>` : ""}
+              ${canCancel ? `<button class="btn-tag danger small" data-cancel="${o.id}" type="button">Cancel</button>` : ""}
+            </div>
+          </td>
+        </tr>
+      `;
+        }).join("");
+
+        tbody.querySelectorAll("[data-advance]").forEach(btn => {
+          btn.addEventListener("click", () => {
+            const o = DB.getOrders().find(x => x.id === btn.dataset.advance);
+            const next = nextStatus(o.status);
+            DB.updateOrderStatus(o.id, next);
+            Toast.success(`${o.id} → ${next}`);
+            renderStats(); renderTable();
+          });
+        });
+        tbody.querySelectorAll("[data-cancel]").forEach(btn => {
+          btn.addEventListener("click", async () => {
+            const ok = await confirmDialog(
+              `Cancel order ${btn.dataset.cancel}? This can't be undone.`,
+              { title: "Cancel order", confirmText: "Yes, cancel", danger: true }
+            );
+            if (!ok) return;
+            DB.updateOrderStatus(btn.dataset.cancel, "Cancelled");
+            Toast.info(`${btn.dataset.cancel} was cancelled.`);
+            renderStats(); renderTable();
+          });
+        });
+      }
+
+      renderFilters();
+      renderStats();
+      renderTable();
+    }
+  </script>
+</body>
+
+</html>

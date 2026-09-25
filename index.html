@@ -1,0 +1,165 @@
+<!-- <?php 
+?> -->
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FreshTrack — Laundry Booking &amp; Order Tracking</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Fraunces:wght@500;600;700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body data-nav-current="home">
+
+  <header class="tag-nav">
+    <div class="container-tag">
+      <a class="brand" href="index.html"><span class="punch"></span>FreshTrack</a>
+      <nav>
+        <a href="index.html" data-nav="home">Home</a>
+        <a href="services.html" data-nav="services">Services</a>
+        <a href="index.html#how-it-works">How it works</a>
+      </nav>
+      <div class="actions" id="navActions"></div>
+    </div>
+  </header>
+
+  <section class="hero">
+    <div class="container-tag">
+      <div>
+        <div class="eyebrow-line">FreshTrack · <b>Booking</b> · Order Tracking</div>
+        <h1>Drop it off. Watch it through the wash. Pick it up ready.</h1>
+        <p class="lede">No more calling the shop to ask if your laundry is done. Book a service online, follow every
+          order from Pending to Ready for Pickup, and keep a full history of what you've sent in.</p>
+        <div class="cta-row">
+          <a class="btn-tag marigold" href="register.html">Book your first order</a>
+          <a class="btn-tag ghost" href="services.html">See services &amp; prices</a>
+        </div>
+      </div>
+      <div class="care-label">
+        <div class="stub">ORDER STUB · FT-10023</div>
+        <div class="symbols">
+          <div class="symbol" title="Wash">🌊</div>
+          <div class="symbol" title="Dry">☀️</div>
+          <div class="symbol" title="Iron">♨️</div>
+        </div>
+        <div class="flow">PENDING → RECEIVED → WASHING → DRYING → READY</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="how-it-works">
+    <div class="container-tag">
+      <div class="section-head">
+        <span class="kicker">HOW IT WORKS</span>
+        <h2>Three steps, start to finish</h2>
+        <p class="text-muted">The same flow whether you're dropping off a weekly wash or a rush order.</p>
+      </div>
+      <div class="steps">
+        <div class="step">
+          <div class="num">01</div>
+          <h3>Choose a service</h3>
+          <p class="text-muted">Browse wash &amp; fold, dry cleaning, ironing, and bedding options with upfront pricing.
+          </p>
+        </div>
+        <div class="step">
+          <div class="num">02</div>
+          <h3>Submit your booking</h3>
+          <p class="text-muted">Tell us the quantity and any handling notes. Your order gets a tracking ID right away.
+          </p>
+        </div>
+        <div class="step">
+          <div class="num">03</div>
+          <h3>Track it to pickup</h3>
+          <p class="text-muted">Watch the status move from Received through Washing and Drying to Ready for Pickup.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section alt">
+    <div class="container-tag">
+      <div class="section-head">
+        <span class="kicker">ORDER STATUS</span>
+        <h2>Every order follows one clear path</h2>
+      </div>
+      <div class="flow-strip">
+        <span class="flow-chip on">Pending</span><span class="flow-arrow">→</span>
+        <span class="flow-chip on">Received</span><span class="flow-arrow">→</span>
+        <span class="flow-chip on">Washing</span><span class="flow-arrow">→</span>
+        <span class="flow-chip on">Drying</span><span class="flow-arrow">→</span>
+        <span class="flow-chip on">Ready for Pickup</span><span class="flow-arrow">→</span>
+        <span class="flow-chip done">Completed</span>
+      </div>
+      <p class="text-muted" style="margin-top:1rem;">Or, if plans change: <span
+          class="flow-chip cancelled">Cancelled</span></p>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container-tag">
+      <div class="section-head">
+        <span class="kicker">SERVICES</span>
+        <h2>Popular right now</h2>
+      </div>
+      <div class="tag-grid" id="serviceGrid"></div>
+      <div style="margin-top:1.6rem;">
+        <a class="btn-tag ghost" href="services.html">View all services →</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="section alt">
+    <div class="container-tag">
+      <div class="section-head">
+        <span class="kicker">WHO IT'S FOR</span>
+        <h2>Built for the whole shop</h2>
+      </div>
+      <div class="tag-grid">
+        <div class="tag-card">
+          <h3>Customers</h3>
+          <p>Book services, follow order status, and look back at past pickups anytime.</p>
+        </div>
+        <div class="tag-card">
+          <h3>Laundry staff</h3>
+          <p>See every incoming order in one queue and move it through the wash stages.</p>
+        </div>
+        <div class="tag-card">
+          <h3>Owners &amp; admins</h3>
+          <p>Manage accounts, oversee staff, and keep an eye on order volume.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer class="tag-footer">
+    <div class="container-tag">
+      <span>© 2026 FreshTrack — a laundry booking &amp; tracking demo.</span>
+      <span>Frontend prototype: HTML5 · CSS3 · JavaScript · Bootstrap</span>
+    </div>
+  </footer>
+
+  <script src="js/data.js"></script>
+  <script src="js/app.js"></script>
+  <script>
+    const grid = document.getElementById("serviceGrid");
+    DB.getServices().slice(0, 3).forEach(s => {
+      grid.insertAdjacentHTML("beforeend", `
+      <div class="tag-card">
+        <span class="price">${fmtMoney(s.price)} <span class="text-muted" style="font-family:var(--font-body); font-weight:400; font-size:.8rem;">${s.unit}</span></span>
+        <h3>${s.name}</h3>
+        <p>${s.description}</p>
+        <span class="meta">Est. ${s.eta}</span>
+      </div>
+    `);
+    });
+  </script>
+</body>
+
+</html>
