@@ -1,0 +1,53 @@
+# Dependencies
+node_modules/
+/vendor/
+
+# Environment files
+.env
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Editor/IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Build outputs
+/dist/
+/build/
+/coverage/
+
+# Cache
+.cache/
+.phpunit.result.cache
+
+# Uploads / runtime data
+/uploads/
+/tmp/
+
+# Composer / PHP
+composer.lock
+*/vendor
+
+# Database files
+*.sqlite
+*.sqlite3
+
+# Misc
+*.bak
+*.orig
+laundry-system.rar
+
+#Temp
+/backend/api/admin
+/backend/api/customer
+/backend/api/staff

@@ -1,0 +1,11 @@
+{
+    "name": "freshtrack/laundry-system",
+    "description": "FreshTrack — laundry booking & order tracking. Composer is only needed for the live-updates WebSocket server (ws-server.php); the rest of the site is plain PHP with no dependencies.",
+    "require": {
+        "php": ">=7.4",
+        "cboden/ratchet": "^0.4.4"
+    },
+    "config": {
+        "optimize-autoloader": true
+    }
+}
