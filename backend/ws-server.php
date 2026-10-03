@@ -17,6 +17,8 @@
  */
 
 require __DIR__ . '/vendor/autoload.php';
+require __DIR__ . '/includes/env.php';
+load_env(__DIR__ . '/.env');
 require __DIR__ . '/config/database.php';
 require __DIR__ . '/config/websocket.php';
 require __DIR__ . '/includes/constants.php';

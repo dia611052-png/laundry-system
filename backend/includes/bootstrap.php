@@ -2,6 +2,9 @@
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
+require_once __DIR__ . '/env.php';
+load_env(__DIR__ . '/../.env');
+
 require_once __DIR__ . '/../config/database.php';
 require_once __DIR__ . '/../config/websocket.php';
 require_once __DIR__ . '/constants.php';

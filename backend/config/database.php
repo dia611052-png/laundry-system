@@ -1,17 +1,19 @@
 <?php
 /**
  * Database connection.
- * Defaults match a stock XAMPP install (MySQL on localhost, root, no password).
- * Change these four constants if your environment differs.
+ * Reads DB_HOST / DB_PORT / DB_NAME / DB_USER / DB_PASS from the
+ * environment (see .env.example), falling back to a stock XAMPP install
+ * (MySQL on localhost:3306, root, no password) if they're not set.
  */
-define('DB_HOST', 'localhost');
-define('DB_NAME', 'freshtrack');
-define('DB_USER', 'root');
-define('DB_PASS', '');
+define('DB_HOST', getenv('DB_HOST') ?: 'localhost');
+define('DB_PORT', getenv('DB_PORT') ?: '3306');
+define('DB_NAME', getenv('DB_NAME') ?: 'freshtrack');
+define('DB_USER', getenv('DB_USER') ?: 'root');
+define('DB_PASS', getenv('DB_PASS') ?: '');
 
 try {
     $pdo = new PDO(
-        'mysql:host=' . DB_HOST . ';dbname=' . DB_NAME . ';charset=utf8mb4',
+        'mysql:host=' . DB_HOST . ';port=' . DB_PORT . ';dbname=' . DB_NAME . ';charset=utf8mb4',
         DB_USER,
         DB_PASS,
         [
