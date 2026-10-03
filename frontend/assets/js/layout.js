@@ -105,16 +105,26 @@ async function requireRole(role) {
 }
 
 /**
- * Loads the sidebar partial into #app-sidebar, shows only the links
- * for `role`, marks `activeItem` active, and fills in the user's name
- * — same effect as sidebar.php's per-role if/elseif.
+ * Loads the sidebar partial in place of #app-sidebar, shows only the
+ * links for `role`, marks `activeItem` active, and fills in the user's
+ * name — same effect as sidebar.php's per-role if/elseif.
+ *
+ * Uses outerHTML (not innerHTML) so the resulting <aside class="dash-side">
+ * becomes a direct child of .dash-shell, same as it was in the original
+ * PHP markup. .dash-shell is a CSS grid that relies on that direct-child
+ * relationship for its default stretch behaviour (full-height sidebar) —
+ * nesting the aside one level deeper inside a wrapper div stops it from
+ * stretching and leaves the sidebar's background short of the page.
  */
 async function initSidebar(role, activeItem, userName) {
   const base = window.APP_BASE;
   const html = await loadPartial(base + 'partials/sidebar.html');
-  const el = document.getElementById('app-sidebar');
+  const placeholder = document.getElementById('app-sidebar');
+  if (!placeholder) return;
+  placeholder.outerHTML = html;
+
+  const el = document.querySelector('.dash-side');
   if (!el) return;
-  el.innerHTML = html;
 
   const who = el.querySelector('[data-slot="who"]');
   if (who) who.textContent = userName;

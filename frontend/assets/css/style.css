@@ -707,7 +707,6 @@ a {
 .tag-footer {
   border-top: 2px dashed var(--line-deep);
   padding: 2rem 0;
-  margin-top: 2rem;
   font-size: .85rem;
   color: var(--ink-soft);
 }
@@ -717,6 +716,17 @@ a {
   justify-content: space-between;
   flex-wrap: wrap;
   gap: 1rem;
+}
+
+.tag-footer a {
+  color: var(--indigo-deep);
+  text-decoration: none;
+}
+
+.tag-footer img {
+  width: 16px;
+  height: 16px;
+  vertical-align: middle;
 }
 
 /* ---------- Empty state ---------- */
