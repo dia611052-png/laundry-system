@@ -52,7 +52,7 @@ function renderOrdersTable(orders) {
     const canCancel = !['Completed', 'Cancelled'].includes(o.status);
 
     const advanceBtn = next
-      ? `<button type="button" class="btn-tag small" data-action="advance" data-id="${o.id}">Mark ${e(next)}</button>`
+      ? `<button type="button" class="btn-tag small" data-action="advance" data-id="${o.id}" data-tracking="${e(o.tracking_code)}">Mark ${e(next)}</button>`
       : '';
     const cancelBtn = canCancel
       ? `<button type="button" class="btn-tag danger small" data-action="cancel" data-id="${o.id}" data-tracking="${e(o.tracking_code)}">Cancel</button>`
@@ -75,13 +75,23 @@ function renderOrdersTable(orders) {
     btn.addEventListener('click', async () => {
       const action = btn.dataset.action;
       const orderId = Number(btn.dataset.id);
+      const tracking = btn.dataset.tracking;
 
-      if (action === 'cancel' && !confirmAction(`Cancel order ${btn.dataset.tracking}?`)) return;
+      if (action === 'cancel' && !confirmAction(`Cancel order ${tracking}?`)) return;
+
+      // Advancing can now also trigger a Gemini call server-side (unless
+      // it's advancing straight to Completed), so this can take a moment.
+      const originalText = btn.textContent;
+      btn.disabled = true;
+      if (action === 'advance') btn.textContent = 'Updating…';
 
       try {
-        await api.patch('/staff/orders.php', { order_id: orderId, action });
+        const result = await api.patch('/staff/orders.php', { order_id: orderId, action });
         await loadAndRender();
+        if (result.predicted) showToast(`Estimate updated for ${tracking}`, 'success');
       } catch (err) {
+        btn.disabled = false;
+        btn.textContent = originalText;
         showToast(err.message, 'error');
       }
     });

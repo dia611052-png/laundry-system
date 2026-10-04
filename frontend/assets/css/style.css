@@ -761,6 +761,101 @@ a {
   color: var(--ink-soft);
 }
 
+/* ---------- Progress bar ---------- */
+.progress-bar {
+  background: var(--paper-deep);
+  border: 1.5px solid var(--line-deep);
+  border-radius: 999px;
+  height: 10px;
+  overflow: hidden;
+  margin-top: .7rem;
+}
+
+.progress-bar-fill {
+  height: 100%;
+  background: var(--indigo-deep);
+  border-radius: 999px;
+  transition: width .4s ease;
+}
+
+.progress-bar-fill.completed {
+  background: var(--success);
+}
+
+.progress-bar-fill.cancelled {
+  background: var(--warn);
+}
+
+.progress-label {
+  font-family: var(--font-tag);
+  font-size: .72rem;
+  color: var(--ink-soft);
+  margin-top: .35rem;
+  display: flex;
+  justify-content: space-between;
+}
+
+/* ---------- Gemini prediction ---------- */
+.predict-box {
+  border: 1.5px dashed var(--line-deep);
+  border-radius: var(--radius);
+  padding: .9rem 1rem;
+  margin-top: .9rem;
+  background: var(--suds-pale);
+}
+
+.predict-box .predict-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: .6rem;
+  flex-wrap: wrap;
+}
+
+.predict-box .predict-title {
+  font-family: var(--font-tag);
+  font-size: .75rem;
+  color: var(--indigo-deep);
+  letter-spacing: .02em;
+}
+
+.predict-box .predict-message {
+  margin-top: .5rem;
+  font-size: .9rem;
+  color: var(--ink);
+}
+
+.predict-box .predict-meta {
+  font-family: var(--font-tag);
+  font-size: .72rem;
+  color: var(--ink-soft);
+  margin-top: .3rem;
+}
+
+.predict-box.loading .predict-message {
+  color: var(--ink-soft);
+  font-style: italic;
+}
+
+.predict-box.error {
+  background: #FBEAE5;
+  border-color: var(--warn);
+}
+
+.predict-box.error .predict-message {
+  color: var(--warn);
+}
+
+.predict-box.placeholder {
+  background: transparent;
+  border-color: var(--line-deep);
+}
+
+.predict-box.placeholder .predict-title,
+.predict-box.placeholder .predict-message {
+  color: var(--ink-soft);
+}
+
 /* ---------- Responsive ---------- */
 @media (max-width: 880px) {
   .hero .container-tag {

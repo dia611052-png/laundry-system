@@ -51,6 +51,24 @@ function status_pill(status) {
   return `<span class="status-pill status-${status_slug(status)}">${e(status)}</span>`;
 }
 
+/** Deterministic completion percentage from status position in STATUS_FLOW (0/20/40/60/80/100). Cancelled = 0. */
+function status_progress_percent(status) {
+  if (status === 'Cancelled') return 0;
+  const idx = STATUS_FLOW.indexOf(status);
+  if (idx === -1) return 0;
+  return Math.round((idx / (STATUS_FLOW.length - 1)) * 100);
+}
+
+/** Renders a labeled progress bar for an order's current status. */
+function render_progress_bar(status) {
+  const percent = status_progress_percent(status);
+  const fillClass = status === 'Completed' ? 'completed' : (status === 'Cancelled' ? 'cancelled' : '');
+  return `
+    <div class="progress-bar"><div class="progress-bar-fill ${fillClass}" style="width:${percent}%"></div></div>
+    <div class="progress-label"><span>${e(status)}</span><span>${percent}%</span></div>
+  `;
+}
+
 /** Renders the horizontal Pending → ... → Completed strip, highlighting progress made so far. */
 function render_flow_strip(currentStatus) {
   const idx = STATUS_FLOW.indexOf(currentStatus);

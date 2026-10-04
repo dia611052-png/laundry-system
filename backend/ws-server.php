@@ -126,6 +126,8 @@ class OrderUpdatesServer implements MessageComponentInterface
 
         $sql = '
             SELECT o.id, o.tracking_code, o.status, o.qty, o.created_at,
+                   o.predicted_remaining_hours, o.predicted_progress_percent,
+                   o.predicted_finish_at, o.predicted_message, o.predicted_at,
                    s.name AS service_name, u.name AS customer_name
             FROM orders o
             JOIN services s ON s.id = o.service_id

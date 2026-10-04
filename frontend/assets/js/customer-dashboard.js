@@ -45,15 +45,24 @@ function renderDashboard(orders) {
 
 function orderCardHtml(o) {
   return `
-    <div class="tag-card" style="margin-bottom:1rem;" data-tracking="${e(o.tracking_code)}">
+    <div class="tag-card" style="margin-bottom:1rem;" data-tracking="${e(o.tracking_code)}" data-status="${e(o.status)}">
       <span class="meta">${e(o.tracking_code)} &middot; ${fmt_date(o.created_at)}</span>
       <h3>${e(o.service_name)} <span class="text-muted" style="font-family:var(--font-body); font-weight:400; font-size:.85rem;">&times; ${o.qty}</span></h3>
-      ${render_flow_strip(o.status)}
+      <div class="live-region">
+        ${render_flow_strip(o.status)}
+        ${render_progress_bar(o.status)}
+        ${render_predict_box(o)}
+      </div>
     </div>
   `;
 }
 
-/** Updates just the flow-strip progress bars in place — same effect as the old updateCustomerOrderProgress(). */
+/**
+ * Refreshes the flow strip, progress bar, and Gemini estimate together as
+ * one block per card — a bulk innerHTML swap rather than juggling several
+ * individual node references (simpler, and avoids a stale-reference bug
+ * a piecemeal replaceWith() approach had here previously).
+ */
 function updateActiveOrderCards(activeOrders) {
   const cards = document.querySelectorAll('#activeOrders [data-tracking]');
   if (!cards.length) return;
@@ -64,11 +73,14 @@ function updateActiveOrderCards(activeOrders) {
   cards.forEach((card) => {
     const order = byTrackingCode.get(card.dataset.tracking);
     if (!order) return;
-    const strip = card.querySelector('.flow-strip');
-    if (strip) {
-      strip.outerHTML = render_flow_strip(order.status);
-      updatedCount++;
+
+    const region = card.querySelector('.live-region');
+    if (region) {
+      region.innerHTML = render_flow_strip(order.status) + render_progress_bar(order.status) + render_predict_box(order);
     }
+
+    card.dataset.status = order.status;
+    updatedCount++;
   });
 
   if (updatedCount > 0) showToast(`Updated ${updatedCount} order progress indicators`, 'success');

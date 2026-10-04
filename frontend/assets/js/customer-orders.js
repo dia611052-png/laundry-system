@@ -55,11 +55,14 @@ function renderTrackingDetail(order, history) {
     </div>
   `).join('');
 
-  document.getElementById('trackingDetail').innerHTML = `
+  const detailEl = document.getElementById('trackingDetail');
+  detailEl.innerHTML = `
     <div class="tag-card">
       <span class="meta">booked ${fmt_date(order.created_at)}</span>
       ${notesLine}
       ${render_flow_strip(order.status)}
+      ${render_progress_bar(order.status)}
+      ${render_predict_box(order)}
       <div style="margin-top:1.1rem;">
         <span class="meta" style="display:block; margin-bottom:.4rem;">HISTORY</span>
         ${historyLines}
