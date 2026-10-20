@@ -1,3 +1,4 @@
+
 document.addEventListener('DOMContentLoaded', async () => {
   const base = window.APP_BASE;
   const user = await initHeaderFooter(null);
@@ -19,7 +20,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const password = document.getElementById('password').value;
 
     try {
-      const { user } = await api.post('/auth/login.php', { email, password });
+      const { user } = await api.post('/auth/login.php', { email, password: await hashPassword(email, password) });
       window.location.href = dashboardUrlFor(user.role, base);
     } catch (err) {
       showFormMessage(msgEl, err.message, 'error');

@@ -10,7 +10,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   const filter = new URLSearchParams(window.location.search).get('status') || 'All';
   connectLiveUpdates('staff', filter !== 'All' ? { status: filter } : {}, (data) => {
     renderOrdersTable(data.activeOrders);
-    showToast(`Order queue updated (${data.activeOrders.length} active)`, 'success');
+    // showToast(`Order queue updated (${data.activeOrders.length} active)`, 'success');
   });
 });
 

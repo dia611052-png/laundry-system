@@ -7,7 +7,7 @@ $name     = trim($body['name'] ?? '');
 $email    = trim($body['email'] ?? '');
 $password = (string) ($body['password'] ?? '');
 
-if ($name === '' || $email === '' || strlen($password) < 6) {
+if ($name === '' || $email === '' || !preg_match('/^[a-f0-9]{64}$/', $password)) {
     json_error('Fill in every field — password needs at least 6 characters.', 422);
 }
 

@@ -83,5 +83,5 @@ function updateActiveOrderCards(activeOrders) {
     updatedCount++;
   });
 
-  if (updatedCount > 0) showToast(`Updated ${updatedCount} order progress indicators`, 'success');
+  // if (updatedCount > 0) showToast(`Updated ${updatedCount} order progress indicators`, 'success');
 }

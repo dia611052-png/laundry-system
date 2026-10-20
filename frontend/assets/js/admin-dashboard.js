@@ -14,14 +14,17 @@ document.addEventListener('DOMContentLoaded', async () => {
     showFormMessage(errorMsg, '');
     showFormMessage(successMsg, '');
 
-    const body = {
-      name: document.getElementById('name').value.trim(),
-      email: document.getElementById('email').value.trim(),
-      password: document.getElementById('password').value,
-      role: document.getElementById('role').value,
-    };
+    const email = document.getElementById('email').value.trim();
+    const plainPassword = document.getElementById('password').value;
 
     try {
+      if (plainPassword.length < 6) throw new Error('Fill in every field — password needs at least 6 characters.');
+      const body = {
+        name: document.getElementById('name').value.trim(),
+        email,
+        password: await hashPassword(email, plainPassword),
+        role: document.getElementById('role').value,
+      };
       const data = await api.post('/admin/users.php', body);
       showFormMessage(successMsg, data.message, 'success');
       ev.target.reset();

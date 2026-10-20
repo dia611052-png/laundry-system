@@ -64,3 +64,16 @@ function showToast(message, type = 'info') {
     setTimeout(() => toast.remove(), 300);
   }, 3000);
 }
+
+/**
+ * SHA-256 of "freshtrack:<email>:<password>", as 64 hex chars. The browser sends
+ * THIS instead of the real password; the server then bcrypt-hashes it again.
+ */
+async function hashPassword(email, password) {
+  if (!window.crypto || !window.crypto.subtle) {
+    throw new Error('Password hashing needs a secure page — open the site at http://localhost/..., not by IP address.');
+  }
+  const data = new TextEncoder().encode(`freshtrack:${email.trim().toLowerCase()}:${password}`);
+  const digest = await window.crypto.subtle.digest('SHA-256', data);
+  return Array.from(new Uint8Array(digest)).map((b) => b.toString(16).padStart(2, '0')).join('');
+}

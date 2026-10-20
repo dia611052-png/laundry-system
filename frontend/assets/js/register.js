@@ -16,8 +16,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     const email = document.getElementById('email').value.trim();
     const password = document.getElementById('password').value;
 
+    if (name === '' || email === '' || password.length < 6) {
+      showFormMessage(msgEl, 'Fill in every field — password needs at least 6 characters.', 'error');
+      return;
+    }
+
     try {
-      await api.post('/auth/register.php', { name, email, password });
+      await api.post('/auth/register.php', { name, email, password: await hashPassword(email, password) });
       window.location.href = base + 'customer/dashboard.html';
     } catch (err) {
       showFormMessage(msgEl, err.message, 'error');

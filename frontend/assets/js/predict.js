@@ -22,7 +22,7 @@ function render_predict_box(order) {
     return `
       <div class="predict-box placeholder">
         <div class="predict-head">
-          <span class="predict-title">✦ GEMINI ESTIMATE</span>
+          <span class="predict-title">✦ FRESHTRACK ESTIMATE</span>
         </div>
         <div class="predict-message">An estimate will appear here once staff starts processing your order.</div>
       </div>
@@ -37,7 +37,7 @@ function render_predict_box(order) {
   return `
     <div class="predict-box">
       <div class="predict-head">
-        <span class="predict-title">✦ GEMINI ESTIMATE</span>
+        <span class="predict-title">✦ FRESHTRACK ESTIMATE</span>
       </div>
       <div class="predict-message">${e(order.predicted_message)}</div>
       ${meta}
