@@ -2,8 +2,10 @@ document.addEventListener('DOMContentLoaded', async () => {
   const user = await requireRole('admin');
   if (!user) return;
 
-  await initHeaderFooter(null);
-  await initSidebar('admin', 'reports', user.name);
+  await Promise.all([
+    initHeaderFooter(null, user),
+    initSidebar('admin', 'reports', user.name)
+  ]);
 
   let data;
   try {

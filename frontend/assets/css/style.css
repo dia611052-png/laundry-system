@@ -703,30 +703,93 @@ a {
   color: var(--ink-soft);
 }
 
-/* ---------- Footer ---------- */
+/* ---------- Comprehensive Footer ---------- */
 .tag-footer {
   border-top: 2px dashed var(--line-deep);
-  padding: 2rem 0;
-  font-size: .85rem;
+  padding: 3.5rem 0 1.5rem;
+  background: var(--paper-deep);
+  font-size: .9rem;
   color: var(--ink-soft);
 }
 
-.tag-footer .container-tag {
-  display: flex;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 1rem;
+.footer-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr;
+  gap: 2.5rem;
+  margin-bottom: 3rem;
 }
 
-.tag-footer a {
+.footer-col h4 {
+  font-family: var(--font-display);
+  font-size: 1.1rem;
   color: var(--indigo-deep);
+  margin-bottom: 1.2rem;
+}
+
+.footer-col ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.footer-col li {
+  margin-bottom: .6rem;
+}
+
+.footer-col a {
+  color: var(--ink-soft);
+  text-decoration: none;
+  transition: color .15s ease;
+}
+
+.footer-col a:hover {
+  color: var(--marigold-deep);
+  text-decoration: underline;
+}
+
+.footer-desc {
+  max-width: 32ch;
+  margin-top: .8rem;
+  font-size: .85rem;
+  line-height: 1.6;
+}
+
+.footer-bottom {
+  display: flex;
+  column-span: all;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 1.5rem;
+  font-size: .8rem;
+}
+
+.footer-bottom a {
+  color: var(--indigo-deep);
+  font-weight: 600;
   text-decoration: none;
 }
 
-.tag-footer img {
-  width: 16px;
-  height: 16px;
-  vertical-align: middle;
+.footer-bottom a:hover {
+  text-decoration: underline;
+}
+
+@media (max-width: 880px) {
+  .footer-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .footer-grid {
+    grid-template-columns: 1fr;
+    gap: 1.8rem;
+  }
+  
+  .footer-bottom {
+    flex-direction: column;
+    gap: 1rem;
+    text-align: center;
+  }
 }
 
 /* ---------- Empty state ---------- */
@@ -1026,4 +1089,43 @@ a {
     animation: none !important;
     transition: none !important;
   }
+}
+
+/* ---------- Skeleton Loaders ---------- */
+.skeleton {
+  background: #E2E8F0;
+  border-radius: var(--radius);
+  animation: skeleton-pulse 1.5s infinite ease-in-out;
+}
+
+@keyframes skeleton-pulse {
+  0% { opacity: 1; }
+  50% { opacity: 0.4; }
+  100% { opacity: 1; }
+}
+
+.skeleton-text {
+  height: 1rem;
+  margin-bottom: 0.5rem;
+  width: 100%;
+}
+
+.skeleton-title {
+  height: 1.5rem;
+  margin-bottom: 1rem;
+  width: 60%;
+}
+
+.skeleton-card {
+  padding: 1.5rem;
+  background: #fff;
+  border: 1.5px solid var(--line-deep);
+  border-radius: var(--radius);
+}
+
+.skeleton-btn {
+  height: 2.2rem;
+  width: 100%;
+  margin-top: 1rem;
+  border-radius: 4px;
 }

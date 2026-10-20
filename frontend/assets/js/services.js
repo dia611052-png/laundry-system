@@ -1,12 +1,29 @@
 document.addEventListener('DOMContentLoaded', async () => {
-  const user = await initHeaderFooter('services');
-
   try {
-    const { services } = await api.get('/services.php?order=id');
+    // Run header load and API fetch at the same time
+    const [user, response] = await Promise.all([
+      initHeaderFooter('services'),
+      api.get('/services.php?order=id')
+    ]);
+    
+    const { services } = response;
     const grid = document.getElementById('all-services');
+    
+    // Once data arrives, clear skeletons
+    if (!services || services.length === 0) {
+      grid.innerHTML = '<p class="text-muted" style="grid-column: 1 / -1; text-align: center;">No services available at the moment.</p>';
+      return;
+    }
+    
     grid.innerHTML = services.map((s) => serviceCardHtml(s, user)).join('');
   } catch (err) {
     console.error('Could not load services', err);
+    document.getElementById('all-services').innerHTML = `
+      <div class="empty-state" style="border-color: var(--warn); color: var(--warn); grid-column: 1 / -1;">
+        <h3>Could not connect to the database</h3>
+        <p>${e(err.message)}</p>
+      </div>
+    `;
   }
 });
 

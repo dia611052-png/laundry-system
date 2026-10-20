@@ -2,8 +2,10 @@ document.addEventListener('DOMContentLoaded', async () => {
   const user = await requireRole('customer');
   if (!user) return;
 
-  await initHeaderFooter(null);
-  await initSidebar('customer', 'overview', user.name);
+  await Promise.all([
+    initHeaderFooter(null, user),
+    initSidebar('customer', 'overview', user.name)
+  ]);
 
   document.getElementById('welcomeHeading').textContent = `Welcome back, ${user.name.split(' ')[0]}`;
 
@@ -12,6 +14,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     ({ orders } = await api.get('/customer/orders.php'));
   } catch (err) {
     console.error('Could not load orders', err);
+    document.getElementById('activeOrders').innerHTML = `
+      <div class="empty-state" style="border-color: var(--warn); color: var(--warn);">
+        <h3>Could not connect to the database</h3>
+        <p>${e(err.message)}</p>
+      </div>
+    `;
   }
 
   renderDashboard(orders);
@@ -57,12 +65,6 @@ function orderCardHtml(o) {
   `;
 }
 
-/**
- * Refreshes the flow strip, progress bar, and Gemini estimate together as
- * one block per card — a bulk innerHTML swap rather than juggling several
- * individual node references (simpler, and avoids a stale-reference bug
- * a piecemeal replaceWith() approach had here previously).
- */
 function updateActiveOrderCards(activeOrders) {
   const cards = document.querySelectorAll('#activeOrders [data-tracking]');
   if (!cards.length) return;
@@ -82,6 +84,4 @@ function updateActiveOrderCards(activeOrders) {
     card.dataset.status = order.status;
     updatedCount++;
   });
-
-  // if (updatedCount > 0) showToast(`Updated ${updatedCount} order progress indicators`, 'success');
 }

@@ -21,11 +21,22 @@ document.addEventListener('DOMContentLoaded', async () => {
       return;
     }
 
+    const submitBtn = document.getElementById('submitBtn');
+    const originalText = submitBtn.textContent;
+
+    // Show loading state
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Registering...';
+    showFormMessage(msgEl, ''); // Clear previous errors
+
     try {
       await api.post('/auth/register.php', { name, email, password: await hashPassword(email, password) });
       window.location.href = base + 'customer/dashboard.html';
     } catch (err) {
       showFormMessage(msgEl, err.message, 'error');
+      // Restore button only on failure (on success, the page redirects)
+      submitBtn.disabled = false;
+      submitBtn.textContent = originalText;
     }
   });
 });

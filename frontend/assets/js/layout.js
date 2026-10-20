@@ -1,39 +1,22 @@
 /* ============================================================
-   FreshTrack — shared layout: loads partials/*.html (this is the
-   HTML/JS stand-in for PHP's `require includes/header.php` etc.),
-   then wires up the bits that used to be filled in server-side.
+   FreshTrack — shared layout (Inline version)
    ============================================================ */
 
-async function loadPartial(url) {
-  const res = await fetch(url);
-  return res.text();
-}
-
 /**
- * Injects the header into #app-header and the footer into #app-footer,
- * sets the active nav link, and shows/hides the login-vs-dashboard
- * actions once we know whether anyone is logged in.
- * `activeNav` matches a header link's data-nav ("home" | "services").
+ * Applies the active nav link and auth state directly to the inline header.
  */
-async function initHeaderFooter(activeNav) {
+async function initHeaderFooter(activeNav, prefetchedUser) {
   const base = window.APP_BASE;
 
-  const [headerHtml, footerHtml] = await Promise.all([
-    loadPartial(base + 'partials/header.html'),
-    loadPartial(base + 'partials/footer.html'),
-  ]);
-
-  const headerEl = document.getElementById('app-header');
-  const footerEl = document.getElementById('app-footer');
-  if (headerEl) headerEl.innerHTML = headerHtml.replaceAll('%%BASE%%', base);
-  if (footerEl) footerEl.innerHTML = footerHtml.replaceAll('%%BASE%%', base);
+  // Target the inline elements directly
+  const headerEl = document.querySelector('.tag-nav');
 
   if (activeNav && headerEl) {
     const link = headerEl.querySelector(`[data-nav="${activeNav}"]`);
     if (link) link.classList.add('active');
   }
 
-  const user = await currentUser();
+  const user = prefetchedUser !== undefined ? prefetchedUser : await currentUser();
   applyAuthState(headerEl, user, base);
   return user;
 }
@@ -46,7 +29,12 @@ function dashboardUrlFor(role, base) {
 
 function applyAuthState(headerEl, user, base) {
   if (!headerEl) return;
-  const authEls  = headerEl.querySelectorAll('.auth-only');
+
+  // Remove the skeleton loader from the header once auth is resolved
+  const headerSkeleton = document.getElementById('header-skeleton');
+  if (headerSkeleton) headerSkeleton.remove();
+
+  const authEls = headerEl.querySelectorAll('.auth-only');
   const guestEls = headerEl.querySelectorAll('.guest-only');
 
   if (user) {
@@ -62,7 +50,11 @@ function applyAuthState(headerEl, user, base) {
     const logoutLink = headerEl.querySelector('[data-slot="logout-link"]');
     if (logoutLink) {
       logoutLink.href = base + 'auth/login.html';
-      logoutLink.addEventListener('click', async (ev) => {
+      // Prevent multiple event listeners if initHeaderFooter is called twice
+      logoutLink.replaceWith(logoutLink.cloneNode(true));
+
+      const newLogoutLink = headerEl.querySelector('[data-slot="logout-link"]');
+      newLogoutLink.addEventListener('click', async (ev) => {
         ev.preventDefault();
         try { await api.post('/auth/logout.php'); } catch (err) { /* log out client-side regardless */ }
         window.location.href = base + 'index.html';
@@ -74,22 +66,16 @@ function applyAuthState(headerEl, user, base) {
   }
 }
 
-/** GET /auth/me.php — returns the session user, or null. */
+let _mePromise;
 async function currentUser() {
-  try {
-    const data = await api.get('/auth/me.php');
-    return data.user;
-  } catch (err) {
-    return null;
+  if (!_mePromise) {
+    _mePromise = api.get('/auth/me.php')
+      .then((data) => data.user)
+      .catch(() => null);
   }
+  return _mePromise;
 }
 
-/**
- * Client-side mirror of require_role()/require_login(): redirects to
- * login (with ?denied=1 on a role mismatch) before the page shows
- * anything it shouldn't. The backend still enforces this for real on
- * every API call — this just avoids a flash of someone else's page.
- */
 async function requireRole(role) {
   const base = window.APP_BASE;
   const user = await currentUser();
@@ -105,24 +91,9 @@ async function requireRole(role) {
 }
 
 /**
- * Loads the sidebar partial in place of #app-sidebar, shows only the
- * links for `role`, marks `activeItem` active, and fills in the user's
- * name — same effect as sidebar.php's per-role if/elseif.
- *
- * Uses outerHTML (not innerHTML) so the resulting <aside class="dash-side">
- * becomes a direct child of .dash-shell, same as it was in the original
- * PHP markup. .dash-shell is a CSS grid that relies on that direct-child
- * relationship for its default stretch behaviour (full-height sidebar) —
- * nesting the aside one level deeper inside a wrapper div stops it from
- * stretching and leaves the sidebar's background short of the page.
+ * Targets the inline sidebar, hides irrelevant links, and sets the user's name.
  */
 async function initSidebar(role, activeItem, userName) {
-  const base = window.APP_BASE;
-  const html = await loadPartial(base + 'partials/sidebar.html');
-  const placeholder = document.getElementById('app-sidebar');
-  if (!placeholder) return;
-  placeholder.outerHTML = html;
-
   const el = document.querySelector('.dash-side');
   if (!el) return;
 

@@ -2,10 +2,12 @@ document.addEventListener('DOMContentLoaded', async () => {
   const user = await requireRole('admin');
   if (!user) return;
 
-  await initHeaderFooter(null);
-  await initSidebar('admin', 'users', user.name);
-
-  await loadAndRender(user.id);
+  // Run layout, sidebar, and data loading simultaneously
+  await Promise.all([
+    initHeaderFooter(null, user),
+    initSidebar('admin', 'users', user.name),
+    loadAndRender(user.id)
+  ]);
 
   document.getElementById('addUserForm').addEventListener('submit', async (ev) => {
     ev.preventDefault();

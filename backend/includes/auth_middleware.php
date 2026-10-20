@@ -42,17 +42,22 @@ function logout_user(): void
     session_destroy();
 }
 
-/**
- * 401s unless someone is logged in. Same guard as before; it responds
- * with a JSON error instead of a redirect, since API endpoints don't
- * have a login page to send the browser to.
- */
+/** Releases the session file lock so concurrent requests from the same user can run in parallel. Call once you no longer need to write to $_SESSION. */
+function release_session_lock(): void
+{
+    if (session_status() === PHP_SESSION_ACTIVE) {
+        session_write_close();
+    }
+}
+
 function require_login(): array
 {
     if (!is_logged_in()) {
         json_error('You need to log in first.', 401);
     }
-    return current_user();
+    $user = current_user();
+    release_session_lock();
+    return $user;
 }
 
 /**

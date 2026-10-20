@@ -2,10 +2,12 @@ document.addEventListener('DOMContentLoaded', async () => {
   const user = await requireRole('staff');
   if (!user) return;
 
-  await initHeaderFooter(null);
-  await initSidebar('staff', 'queue', user.name);
-
-  await loadAndRender();
+  // None of these three depend on each other's DOM output — run together.
+  await Promise.all([
+    initHeaderFooter(null, user),   // pass the already-fetched user in
+    initSidebar('staff', 'queue', user.name),
+    loadAndRender(),
+  ]);
 
   const filter = new URLSearchParams(window.location.search).get('status') || 'All';
   connectLiveUpdates('staff', filter !== 'All' ? { status: filter } : {}, (data) => {

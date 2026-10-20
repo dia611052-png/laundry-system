@@ -2,6 +2,7 @@
 require_once __DIR__ . '/../../includes/bootstrap.php';
 require_method(['GET']);
 
-json_response([
-    'user' => current_user(), // null if nobody is logged in
-]);
+$user = current_user();
+release_session_lock();   // this endpoint is hit first on every dashboard
+
+json_response(['user' => $user]);

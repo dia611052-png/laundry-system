@@ -16,17 +16,18 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   renderOrdersTable(orders, selectedId);
 
-  // Prefetch all details to prevent loading/refresh on click
+  // One bulk request instead of N parallel ones (which the PHP session lock
+  // would serialize anyway). If the server is on an older build that ignores
+  // `include_history`, the fallback fills `history: []` — tracking still works.
   const trackingCache = {};
-  if (orders.length > 0) {
-    await Promise.all(orders.map(async (o) => {
-      try {
-        const data = await api.get(`/customer/orders.php?id=${encodeURIComponent(o.id)}`);
-        trackingCache[o.id] = data;
-      } catch (err) {
-        console.error('Could not prefetch detail for', o.id, err);
-      }
-    }));
+  try {
+    const bulk = await api.get('/customer/orders.php?include_history=1');
+    bulk.orders.forEach((o) => {
+      trackingCache[o.id] = { order: o, history: o.history || [] };
+    });
+  } catch (err) {
+    console.error('Could not prefetch order details', err);
+    orders.forEach((o) => { trackingCache[o.id] = { order: o, history: [] }; });
   }
 
   let currentTrackingId = selectedId;
@@ -41,7 +42,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   document.getElementById('ordersBody').addEventListener('click', (e) => {
     const btn = e.target.closest('.btn-track');
     if (!btn) return;
-    
+
     e.preventDefault(); // Prevents page reload
 
     const id = btn.dataset.id;
@@ -66,7 +67,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   function positionTrackingDetail(id, isResize = false) {
     const isMobile = window.innerWidth <= 700;
     const main = document.querySelector('.dash-main');
-    
+
     // Grab the actual DOM elements
     let actualHead = document.querySelector('.section-head');
     let actualDetail = document.getElementById('trackingDetail');

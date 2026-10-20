@@ -1,8 +1,14 @@
 document.addEventListener('DOMContentLoaded', async () => {
-  const user = await requireRole('customer');
-  if (!user) return;
+  // 1. Fire off the layout loading in parallel (don't await yet)
+  const layoutPromise = initHeaderFooter(null);
+  const sidebarPromise = initSidebar('customer', 'book', 'Loading...'); // Show placeholder name
 
-  await initHeaderFooter(null);
+  // 2. Check auth at the same time
+  const user = await requireRole('customer');
+  if (!user) return; // If not logged in, it redirects and stops here
+
+  // 3. Wait for layout to finish, then update the sidebar with the real name
+  await layoutPromise;
   await initSidebar('customer', 'book', user.name);
 
   const select = document.getElementById('service_id');
@@ -47,6 +53,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     showFormMessage(errorMsg, '');
     showFormMessage(successMsg, '');
 
+    const submitBtn = document.getElementById('submitBtn');
+    const originalText = submitBtn.textContent;
+
+    // 1. Disable button and change text
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Submitting...';
+
     const body = {
       service_id: Number(select.value),
       qty: Number(document.getElementById('qty').value) || 1,
@@ -62,6 +75,10 @@ document.addEventListener('DOMContentLoaded', async () => {
       dropoff.value = today;
     } catch (err) {
       showFormMessage(errorMsg, err.message, 'error');
+    } finally {
+      // 2. Always restore the button state, whether it succeeded or failed
+      submitBtn.disabled = false;
+      submitBtn.textContent = originalText;
     }
   });
 });
