@@ -178,7 +178,8 @@ class OrderUpdatesServer implements MessageComponentInterface
 $app = new OrderUpdatesServer($pdo);
 
 $loop   = Loop::get();
-$socket = new SocketServer(WS_HOST . ':' . WS_PORT, [], $loop);
+$port = getenv('PORT') ?: WS_PORT;
+$socket = new SocketServer(WS_HOST . ':' . $port, [], $loop);
 $server = new IoServer(new HttpServer(new WsServer($app)), $socket, $loop);
 
 $loop->addPeriodicTimer(WS_BROADCAST_INTERVAL, fn () => $app->tick());
