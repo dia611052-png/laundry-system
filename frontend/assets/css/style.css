@@ -947,8 +947,39 @@ a {
 }
 
 @media (max-width: 700px) {
+  .tag-nav [data-slot="dashboard-link"] {
+    display: none !important;
+  }
+  
   .tag-nav nav {
     display: none;
+  }
+
+  .tag-nav .actions {
+    gap: 0.4rem;
+  }
+
+  .tag-nav .actions .btn-tag {
+    padding: 0.35rem 0.6rem; 
+    font-size: 0.75rem;      
+    white-space: nowrap;     
+  }
+}
+
+
+@media (max-width: 700px) {
+  .hero .cta-row {
+    flex-wrap: nowrap;
+    width: 100%;
+    gap: 0.5rem;
+  }
+
+  .hero .cta-row .btn-tag {
+    flex: 1;
+    padding: 0.5rem 0.25rem;
+    font-size: 0.75rem; /* Smaller text */
+    white-space: nowrap; /* Prevents the text inside from breaking into 2 lines */
+    justify-content: center; /* Centers the text */
   }
 }
 
@@ -1038,6 +1069,14 @@ a {
 
   .table-tag td:nth-child(6)::before {
     content: "";
+  }
+
+  .table-tag tr.skeleton-row td {
+    justify-content: flex-start !important;
+  }
+  
+  .table-tag tr.skeleton-row td::before {
+    display: none !important;
   }
 }
 
