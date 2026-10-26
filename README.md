@@ -4,7 +4,7 @@ This project was restructured into three parts:
 
 ```
 laundry-system/
-├── frontend/   Static HTML + CSS + JS. Fetches everything from the backend API.
+├── client/   Static HTML + CSS + JS. Fetches everything from the backend API.
 ├── backend/    PHP REST API. Every endpoint returns JSON — no HTML rendering.
 └── database/   schema.sql — import this into MySQL to create the freshtrack database.
 ```
