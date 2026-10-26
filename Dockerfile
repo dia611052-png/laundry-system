@@ -28,9 +28,11 @@ WORKDIR /var/www/html
 RUN a2enmod rewrite
 RUN sed -i 's/Listen 80/Listen ${PORT}/g' /etc/apache2/ports.conf
 
-# 6. FIX: Disable conflicting MPMs and enable the required one
-RUN a2dismod mpm_event mpm_worker
+# 6. FIX: Forcefully remove conflicting MPM files and ensure prefork is enabled
+RUN rm -f /etc/apache2/mods-enabled/mpm_event.* /etc/apache2/mods-enabled/mpm_worker.*
 RUN a2enmod mpm_prefork
 
-# 7. Start Apache
-CMD ["apache2-foreground"]
+# 7. Start Apache with the custom fix
+CMD rm -f /etc/apache2/mods-enabled/mpm_event.* /etc/apache2/mods-enabled/mpm_worker.* && \
+    a2enmod mpm_prefork 2>/dev/null || true && \
+    apache2-foreground
