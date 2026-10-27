@@ -1,19 +1,6 @@
 <?php
 /**
  * FreshTrack live-updates server.
- *
- * Replaces the old client-side polling: connected browsers (admin
- * reports, staff dashboard, customer dashboard) get pushed fresh order
- * data over a WebSocket instead of re-fetching a PHP endpoint every few
- * seconds.
- *
- * Run it (from the backend/ folder):
- *   composer install        # one-time, pulls in Ratchet
- *   php ws-server.php
- *
- * Configure host/port/interval in config/websocket.php (or via the
- * WS_HOST / WS_PORT / WS_BROADCAST_INTERVAL / WS_PUBLIC_URL env vars —
- * see that file for deployment notes).
  */
 
 require __DIR__ . '/vendor/autoload.php';
@@ -31,13 +18,8 @@ use Ratchet\WebSocket\WsServer;
 use React\EventLoop\Loop;
 use React\Socket\SocketServer;
 
-/**
- * Tracks connected clients and pushes each of them a role-appropriate
- * slice of order data whenever tick() runs.
- */
 class OrderUpdatesServer implements MessageComponentInterface
 {
-    /** @var \SplObjectStorage<ConnectionInterface> */
     protected \SplObjectStorage $clients;
     protected PDO $pdo;
 
@@ -52,8 +34,6 @@ class OrderUpdatesServer implements MessageComponentInterface
         $query = [];
         parse_str($conn->httpRequest->getUri()->getQuery(), $query);
 
-        // Stash the client's requested view on the connection itself so
-        // tick() knows what to send it later without re-parsing anything.
         $conn->role         = in_array($query['role'] ?? '', ['admin', 'staff', 'customer'], true)
             ? $query['role']
             : 'guest';
@@ -71,14 +51,12 @@ class OrderUpdatesServer implements MessageComponentInterface
 
         $this->log("Client #{$conn->resourceId} connected — {$label}. " . count($this->clients) . ' total.');
 
-        // Send a snapshot immediately so the page has live data right
-        // away instead of waiting for the next tick.
         $this->sendTo($conn);
     }
 
     public function onMessage(ConnectionInterface $from, $msg): void
     {
-        // Clients are read-only listeners; nothing to do with inbound messages.
+        // Clients are read-only listeners
     }
 
     public function onClose(ConnectionInterface $conn): void
@@ -93,9 +71,16 @@ class OrderUpdatesServer implements MessageComponentInterface
         $conn->close();
     }
 
-    /** Called on a timer; pushes fresh data to every connected client. */
     public function tick(): void
     {
+        // 1. KEEP ALIVE: Ping the database every tick to prevent Layerbase from timing it out
+        try {
+            $this->pdo->query('SELECT 1');
+        } catch (PDOException $e) {
+            $this->log("Database ping failed. Reconnecting...", true);
+            $this->reconnect();
+        }
+
         if (count($this->clients) === 0) {
             return;
         }
@@ -107,7 +92,16 @@ class OrderUpdatesServer implements MessageComponentInterface
     protected function sendTo(ConnectionInterface $conn): void
     {
         try {
-            $conn->send(json_encode($this->buildPayload($conn->role, $conn->statusFilter, $conn->customerId)));
+            // 2. If a query fails during sending, reconnect and try one more time
+            try {
+                $payload = $this->buildPayload($conn->role, $conn->statusFilter, $conn->customerId);
+            } catch (PDOException $e) {
+                $this->log("Query failed: " . $e->getMessage() . ". Reconnecting and retrying...", true);
+                $this->reconnect();
+                $payload = $this->buildPayload($conn->role, $conn->statusFilter, $conn->customerId);
+            }
+            
+            $conn->send(json_encode($payload));
         } catch (\Throwable $e) {
             $this->log("Failed to send update to client #{$conn->resourceId}: {$e->getMessage()}", true);
         }
@@ -136,19 +130,15 @@ class OrderUpdatesServer implements MessageComponentInterface
         $params = [];
 
         if ($role === 'staff') {
-            // Staff dashboard doubles as an order history log: show every
-            // status unless a specific filter was requested.
             if ($statusFilter && $statusFilter !== 'All' && in_array($statusFilter, $allStatuses, true)) {
                 $conditions[] = 'o.status = ?';
                 $params[] = $statusFilter;
             }
         } elseif ($role === 'customer' && $customerId) {
-            // Customers only ever see their own in-progress orders.
             $conditions[] = 'o.customer_id = ?';
             $params[] = $customerId;
             $conditions[] = 'o.status NOT IN ("Completed", "Cancelled")';
         } else {
-            // Admin (and any unrecognized role) only needs statusCounts.
             $conditions[] = '1 = 0';
         }
 
@@ -166,6 +156,27 @@ class OrderUpdatesServer implements MessageComponentInterface
             'statusCounts' => $statusCounts,
             'activeOrders' => $stmt->fetchAll(),
         ];
+    }
+
+    /** Re-establishes the dead database connection */
+    protected function reconnect(): void
+    {
+        try {
+            $this->pdo = new PDO(
+                'mysql:host=' . DB_HOST . ';port=' . DB_PORT . ';dbname=' . DB_NAME . ';charset=utf8mb4',
+                DB_USER,
+                DB_PASS,
+                [
+                    PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
+                    PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+                    PDO::ATTR_EMULATE_PREPARES   => false,
+                    PDO::ATTR_TIMEOUT            => 5,
+                ]
+            );
+            $this->log("Database reconnected successfully.");
+        } catch (PDOException $e) {
+            $this->log("Database reconnection failed: " . $e->getMessage(), true);
+        }
     }
 
     protected function log(string $message, bool $isError = false): void
